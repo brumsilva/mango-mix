@@ -18,6 +18,13 @@ export default {
         display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
       },
       colors: {
+        mango: {
+          DEFAULT: "hsl(var(--mango))",
+          deep: "hsl(var(--mango-deep))",
+        },
+        leaf: "hsl(var(--leaf))",
+        chili: "hsl(var(--chili))",
+        cream: "hsl(var(--cream))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

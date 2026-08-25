@@ -36,6 +36,13 @@
 
     --radius: 0.5rem;
 
+    /* Mango Mix brand */
+    --mango: 47 100% 52%;
+    --mango-deep: 34 96% 52%;
+    --leaf: 148 68% 20%;
+    --chili: 8 82% 52%;
+    --cream: 46 78% 97%;
+
     --success: 172 50% 40%;
     --success-foreground: 0 0% 100%;
     --warning: 38 80% 55%;
