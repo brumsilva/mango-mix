@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   motion,
   useMotionValueEvent,
@@ -495,7 +494,7 @@ function ViralReelsStory() {
   );
 }
 
-function LeadForm({ compact = false }: { compact?: boolean }) {
+function LeadForm() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
@@ -517,7 +516,7 @@ function LeadForm({ compact = false }: { compact?: boolean }) {
     setLoading(true);
     const { error } = await supabase.from("franchise_leads").insert({
       ...form,
-      source: compact ? "hero" : "homepage",
+      source: "homepage",
     });
     setLoading(false);
     if (error) {
@@ -1097,9 +1096,6 @@ export default function MangoMixFranquia() {
             <a href={IG_PROFILE} target="_blank" rel="noreferrer" className="transition-colors hover:text-leaf">
               <Instagram className="h-5 w-5" />
             </a>
-            <Link to="/plataforma" className="transition-colors hover:text-leaf">
-              Área do organizador
-            </Link>
           </div>
         </div>
       </footer>
