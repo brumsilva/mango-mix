@@ -536,6 +536,48 @@ export type Database = {
           },
         ]
       }
+      franchise_leads: {
+        Row: {
+          capital_range: string | null
+          city: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string | null
+          phone: string
+          source: string | null
+          state: string | null
+          timeline: string | null
+        }
+        Insert: {
+          capital_range?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message?: string | null
+          phone: string
+          source?: string | null
+          state?: string | null
+          timeline?: string | null
+        }
+        Update: {
+          capital_range?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          source?: string | null
+          state?: string | null
+          timeline?: string | null
+        }
+        Relationships: []
+      }
       image_generation_jobs: {
         Row: {
           count: number
