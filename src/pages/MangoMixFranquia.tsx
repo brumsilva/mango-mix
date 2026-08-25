@@ -476,7 +476,7 @@ export default function MangoMixFranquia() {
                 "Público de todas as idades",
               ].map((t) => (
                 <div key={t} className="flex items-start gap-2.5 text-sm font-medium">
-                  <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-leaf" />
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-leaf" />
                   <span>{t}</span>
                 </div>
               ))}
@@ -518,7 +518,7 @@ export default function MangoMixFranquia() {
               marketing da marca trabalhando por você todos os dias, sem precisar construir audiência do zero.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="h-13 rounded-full bg-mango px-7 font-bold text-leaf hover:bg-mango/90">
+              <Button asChild size="lg" className="h-14 rounded-full bg-mango px-7 font-bold text-leaf hover:bg-mango/90">
                 <a href="#quero-ser-franqueado">
                   Quero esse fluxo na minha cidade <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
@@ -527,7 +527,7 @@ export default function MangoMixFranquia() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-13 rounded-full border-cream/30 bg-transparent px-7 font-semibold text-cream hover:bg-cream/10 hover:text-cream"
+                className="h-14 rounded-full border-cream/30 bg-transparent px-7 font-semibold text-cream hover:bg-cream/10 hover:text-cream"
               >
                 <a href={IG_PROFILE} target="_blank" rel="noreferrer">
                   Abrir o perfil
