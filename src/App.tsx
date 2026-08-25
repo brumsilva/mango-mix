@@ -13,6 +13,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 
 import Landing from "./pages/Landing";
+import MangoMixFranquia from "./pages/MangoMixFranquia";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
@@ -57,7 +58,8 @@ const App = () => (
             <SmoothScroll />
             <Routes>
               {/* Public */}
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<MangoMixFranquia />} />
+              <Route path="/plataforma" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/register/:slug" element={<Register />} />
