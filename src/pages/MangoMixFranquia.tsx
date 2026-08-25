@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from "framer-motion";
 import {
   ArrowRight,
   Instagram,
@@ -10,11 +15,15 @@ import {
   TrendingUp,
   Users,
   Store,
-  Truck,
-  Building2,
   CheckCircle2,
   Quote,
   Loader2,
+  BadgeDollarSign,
+  PackageCheck,
+  Play,
+  Eye,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,8 +50,44 @@ import heroImg from "@/assets/mango-hero.jpg";
 import kioskImg from "@/assets/mango-kiosk.jpg";
 import flatlayImg from "@/assets/mango-flatlay.jpg";
 import founderImg from "@/assets/mango-founder.jpg";
+import viral127mVideo from "@/assets/reels/tiktok-12-7m.mp4";
+import viral127mPoster from "@/assets/reels/tiktok-12-7m.jpg";
+import viral64mVideo from "@/assets/reels/tiktok-6-4m.mp4";
+import viral64mPoster from "@/assets/reels/tiktok-6-4m.jpg";
+import viral55mVideo from "@/assets/reels/tiktok-5-5m.mp4";
+import viral55mPoster from "@/assets/reels/tiktok-5-5m.jpg";
 
 const IG_PROFILE = "https://www.instagram.com/mangomixoficial/";
+
+const VIRAL_REELS = [
+  {
+    id: "7528168792057302277",
+    views: "12,7 milhões",
+    kicker: "O maior viral",
+    title: "A manga mais famosa do mundo virou desejo em escala nacional. 🥭🌎",
+    text: "O vídeo líder do perfil transforma preparo, textura e sabor em 12,7 milhões de oportunidades de descoberta da marca.",
+    video: viral127mVideo,
+    poster: viral127mPoster,
+  },
+  {
+    id: "7424262911142595845",
+    views: "6,4 milhões",
+    kicker: "Comunidade que volta",
+    title: "A cliente viralizou, voltou e virou parte da história. 🥭✨",
+    text: "Conteúdo com pessoas reais cria reconhecimento, recorrência e uma comunidade que acompanha a marca além da primeira compra.",
+    video: viral64mVideo,
+    poster: viral64mPoster,
+  },
+  {
+    id: "7574861449630207252",
+    views: "5,5 milhões",
+    kicker: "Inauguração que repercute",
+    title: "Uma nova unidade já nasce com atenção digital. 🚀🥭",
+    text: "A inauguração no North Shopping mostra como expansão física e distribuição social trabalham juntas para gerar desejo local.",
+    video: viral55mVideo,
+    poster: viral55mPoster,
+  },
+];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -59,15 +104,24 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className={`px-5 py-20 md:py-28 ${className}`}>
-      <div className="mx-auto w-full max-w-6xl">{children}</div>
+    <section id={id} className={`relative overflow-hidden border-b-[3px] border-leaf px-5 py-20 md:py-28 ${className}`}>
+      <div className="relative z-10 mx-auto w-full max-w-6xl">
+        {children}
+        {id !== "quero-ser-franqueado" && (
+          <div className="mt-14 flex justify-center">
+            <Button asChild size="lg" className="h-14 rounded-full border-[3px] border-leaf bg-chili px-8 font-extrabold text-cream shadow-[6px_7px_0_hsl(var(--leaf))] hover:bg-chili/90">
+              <a href="#quero-ser-franqueado">Quero ser franqueado 🥭 <ArrowRight className="ml-2 h-5 w-5" /></a>
+            </Button>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-leaf/20 bg-leaf/5 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-leaf">
+    <span className="inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-leaf bg-mango px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-leaf shadow-[4px_4px_0_hsl(var(--leaf))]">
       {children}
     </span>
   );
@@ -76,18 +130,24 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 const PRESS = [
   {
     outlet: "Estadão",
+    logo: "ESTADÃO",
+    logoClass: "font-serif text-2xl font-black tracking-[-0.05em]",
     quote:
       "Clientes formam filas para comer manga com sal, limão e leite condensado após vídeo viralizar.",
     href: "https://www.estadao.com.br/pme/salada-manga-sal-limao-leite-condensado-milhoes-visualizacoes-nprei/",
   },
   {
     outlet: "PEGN / Globo",
+    logo: "PEGN",
+    logoClass: "font-sans text-2xl font-black tracking-[-0.06em] text-chili",
     quote:
       "Restaurante especializado em salada de manga chama atenção nas redes: 'Não tô acreditando'.",
     href: "https://revistapegn.globo.com/redes-sociais/noticia/2024/05/restaurante-especializado-em-salada-de-manga-chama-atencao-nas-redes-nao-to-acreditando.ghtml",
   },
   {
     outlet: "Diário do Nordeste",
+    logo: "Diário do Nordeste",
+    logoClass: "font-serif text-xl font-bold italic tracking-tight",
     quote:
       "Cearense adapta negócio dos EUA e vende a fruta de forma inusitada: o Mango Mix.",
     href: "https://diariodonordeste.verdesmares.com.br/verso/manga-com-sal-e-mais-temperos-cearense-adapta-negocio-dos-eua-e-vende-a-fruta-de-forma-inusitada-1.3523533",
@@ -107,8 +167,8 @@ const WHY = [
   },
   {
     icon: Users,
-    title: "Audiência de 1 milhão",
-    text: "Mais de 1 milhão de seguidores no Instagram alimentam cada nova unidade com demanda no dia da inauguração.",
+    title: "Audiência comprovada",
+    text: "O Instagram oficial reúne 1,2 milhão de seguidores, enquanto o TikTok soma 352,9 mil seguidores e 3,9 milhões de curtidas.",
   },
   {
     icon: Store,
@@ -127,24 +187,24 @@ const WHY = [
   },
 ];
 
-const MODELS = [
+const INVESTMENT = [
+  {
+    icon: BadgeDollarSign,
+    name: "Taxa de franquia",
+    desc: "Seu investimento inclui o acesso à marca, ao método operacional e à implantação acompanhada pelo time Mango Mix.",
+    points: ["Licença de uso da marca", "Transferência de know-how", "Apoio de expansão"],
+  },
   {
     icon: Store,
-    name: "Quiosque de shopping",
-    desc: "O formato-mãe da marca. Alto fluxo, operação compacta e vitrine que atrai o público de passagem.",
-    points: ["A partir de ~9 m²", "Equipe de 2 a 4 pessoas", "Alto impulso de compra"],
+    name: "Estrutura da unidade",
+    desc: "O formato contempla a estrutura padronizada do quiosque e as orientações necessárias para colocar a operação de pé.",
+    points: ["Projeto arquitetônico orientado", "Estrutura padronizada", "Vitrine de alto impacto"],
   },
   {
-    icon: Building2,
-    name: "Loja de rua",
-    desc: "Para bairros de grande circulação e cidades litorâneas, com espaço para consumo no local e delivery.",
-    points: ["Espaço para consumo", "Delivery e retirada", "Marca com fachada própria"],
-  },
-  {
-    icon: Truck,
-    name: "Contêiner / eventos",
-    desc: "Formato móvel para praias, feiras e grandes eventos — a porta de entrada com menor investimento.",
-    points: ["Mobilidade total", "Ideal para sazonalidade", "Menor investimento inicial"],
+    icon: PackageCheck,
+    name: "Equipamentos e implantação",
+    desc: "Também fazem parte do planejamento os equipamentos, utensílios, materiais e o suporte para treinamento da equipe.",
+    points: ["Cervejeira e freezer", "Utensílios e materiais", "Deslocamento da equipe de treinamento"],
   },
 ];
 
@@ -162,7 +222,11 @@ const FAQ = [
   },
   {
     q: "Qual é o investimento?",
-    a: "O valor varia conforme o modelo de unidade (quiosque, loja de rua ou contêiner), o ponto e a praça. Enviamos a apresentação completa com investimento, taxas e projeções após o primeiro contato.",
+    a: "O valor é apresentado individualmente após a qualificação da praça e do formato. O investimento contempla taxa de franquia, estrutura da unidade, equipamentos, utensílios, materiais, implantação e treinamento; a composição final varia conforme cidade e ponto.",
+  },
+  {
+    q: "Qual é o prazo de retorno?",
+    a: "A franqueadora informa uma estimativa de payback entre 4 e 5 meses no cenário atual, com rentabilidade indicada entre 30% e 35%. Esses números são referências comerciais, não garantia de resultado: desempenho depende de praça, ponto, gestão, custos e vendas de cada unidade.",
   },
   {
     q: "Vocês ajudam a escolher o ponto?",
@@ -181,6 +245,255 @@ const FAQ = [
     a: "Depende do ponto e da obra. Com o ponto aprovado, o processo padrão de implantação costuma ser de poucos meses até a inauguração.",
   },
 ];
+
+function AutoplayVideo({
+  src,
+  poster,
+  soundEnabled,
+  onVisible,
+  active = true,
+  className = "",
+}: {
+  src: string;
+  poster: string;
+  soundEnabled: boolean;
+  onVisible?: () => void;
+  active?: boolean;
+  className?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const visibleRef = useRef(false);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !soundEnabled;
+    if (soundEnabled && active && visibleRef.current && !reduceMotion) {
+      void video.play().catch(() => undefined);
+    }
+  }, [active, reduceMotion, soundEnabled]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+    if (reduceMotion) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          onVisible?.();
+        }
+        if (entry.isIntersecting && active) {
+          void video.play().catch(() => undefined);
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.55 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [active, onVisible, reduceMotion, src]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      poster={poster}
+      muted={!soundEnabled}
+      loop
+      playsInline
+      preload="metadata"
+      controls={Boolean(reduceMotion)}
+      className={className}
+      aria-label="Vídeo do perfil oficial Mango Mix"
+    />
+  );
+}
+
+function ViralReelsStory() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
+  const [active, setActive] = useState(0);
+  const [mobileActive, setMobileActive] = useState(0);
+  const [soundFor, setSoundFor] = useState<number | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+    const next = Math.min(VIRAL_REELS.length - 1, Math.floor(progress * VIRAL_REELS.length));
+    setActive((current) => (current === next ? current : next));
+  });
+
+  const reel = VIRAL_REELS[active];
+
+  return (
+    <>
+      <section className="relative overflow-hidden bg-mango px-5 py-20 text-leaf lg:hidden" aria-label="Reels de maior alcance no celular">
+        <div className="pointer-events-none absolute -right-24 top-40 h-72 w-72 rounded-full border-[42px] border-cream/35" />
+        <div className="relative mx-auto max-w-md">
+          <span className="inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-leaf bg-cream px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] shadow-[4px_4px_0_hsl(var(--leaf))]">
+            <Play className="h-3.5 w-3.5 fill-current" /> Aperte o play com o scroll
+          </span>
+          <h2 className="mt-8 font-sans text-[clamp(3.5rem,17vw,5.5rem)] font-black leading-[0.86] tracking-[-0.075em]">
+            Conteúdo
+            <span className="block text-leaf/75">que vira</span>
+            <span className="mt-3 inline-block -rotate-2 rounded-full border-[3px] border-leaf bg-chili px-5 py-2 text-cream shadow-[6px_6px_0_hsl(var(--leaf))]">fila.</span>
+          </h2>
+          <p className="mt-8 max-w-sm text-base font-semibold leading-relaxed text-leaf/80">
+            Os três maiores virais da marca, agora dentro da experiência. Cada vídeo começa sozinho quando entra em cena.
+          </p>
+
+          <div className="mt-12 grid gap-14">
+            {VIRAL_REELS.map((item, index) => (
+              <article
+                key={item.id}
+                className={`relative rounded-[2rem] border-[3px] border-leaf bg-cream p-3 shadow-[9px_10px_0_hsl(var(--leaf))] ${index === 1 ? "rotate-1" : "-rotate-1"}`}
+              >
+                <div className="flex items-center justify-between gap-4 px-2 py-2">
+                  <span className="text-[0.65rem] font-extrabold uppercase tracking-[0.18em]">TikTok 0{index + 1} · {item.kicker}</span>
+                  <span className="rounded-full bg-leaf px-3 py-1 font-display text-sm font-extrabold text-mango">{item.views}</span>
+                </div>
+                <div className="relative aspect-[9/16] overflow-hidden rounded-[1.35rem] border-2 border-leaf bg-leaf">
+                  <AutoplayVideo
+                    src={item.video}
+                    poster={item.poster}
+                    soundEnabled={soundFor === index}
+                    active={mobileActive === index}
+                    onVisible={() => setMobileActive(index)}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-leaf/90 via-leaf/35 to-transparent px-5 pb-5 pt-20 text-cream">
+                    <h3 className="font-display text-2xl font-extrabold leading-tight">{item.title}</h3>
+                  </div>
+                  <span className={`absolute left-4 top-4 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-extrabold uppercase tracking-wider text-cream ${mobileActive === index ? "bg-chili" : "bg-leaf/80"}`}>
+                    <span className={`h-2 w-2 rounded-full bg-cream ${mobileActive === index ? "motion-safe:animate-pulse" : ""}`} /> {reduceMotion ? "Toque para reproduzir" : mobileActive === index ? "Em exibição" : "Role para assistir"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSoundFor((current) => current === index ? null : index)}
+                    className="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border-2 border-leaf bg-cream px-3 py-2 text-[0.65rem] font-extrabold uppercase tracking-wider text-leaf shadow-[3px_3px_0_hsl(var(--leaf))]"
+                    aria-label={soundFor === index ? "Desativar som deste vídeo" : "Ativar som deste vídeo"}
+                  >
+                    {soundFor === index ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+                    {soundFor === index ? "Som ligado" : "Ativar som"}
+                  </button>
+                </div>
+                <p className="px-3 pb-3 pt-4 text-sm font-medium leading-relaxed text-leaf/75">{item.text}</p>
+              </article>
+            ))}
+          </div>
+          <Button asChild size="lg" className="mt-16 h-14 w-full rounded-full border-[3px] border-leaf bg-chili font-extrabold text-cream shadow-[6px_7px_0_hsl(var(--leaf))]">
+            <a href="#quero-ser-franqueado">Quero levar essa atenção para minha cidade 🥭</a>
+          </Button>
+        </div>
+      </section>
+
+      <section ref={sectionRef} className="relative hidden min-h-[330svh] bg-mango text-leaf lg:block" aria-label="Reels de maior alcance">
+        <div className="sticky top-0 flex min-h-screen items-center overflow-hidden px-5 py-12">
+          <div className="pointer-events-none absolute -left-20 -top-20 h-80 w-80 rounded-full border-[52px] border-cream/40" />
+          <div className="pointer-events-none absolute -bottom-32 right-1/3 h-96 w-96 rounded-full border-[62px] border-chili/20" />
+          <div className="pointer-events-none absolute inset-x-0 top-5 overflow-hidden whitespace-nowrap font-display text-[8rem] font-extrabold uppercase leading-none tracking-[-0.08em] text-cream/25 xl:text-[11rem]">
+            Stop scroll · stop scroll ·
+          </div>
+
+          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-16 lg:grid-cols-[1fr_430px]">
+            <div className="pt-12">
+              <span className="inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-leaf bg-cream px-5 py-2.5 text-xs font-extrabold uppercase tracking-[0.18em] shadow-[5px_5px_0_hsl(var(--leaf))]">
+                <Play className="h-3.5 w-3.5 fill-current" /> Conteúdo que vira fila
+              </span>
+              <h2 className="mt-8 font-sans text-[clamp(4.2rem,7vw,7.2rem)] font-black leading-[0.85] tracking-[-0.075em]">
+                Pare o
+                <span className="block text-leaf/75">scroll.</span>
+                <span className="mt-4 inline-block -rotate-2 rounded-full border-[4px] border-leaf bg-chili px-7 py-2 text-cream shadow-[8px_8px_0_hsl(var(--leaf))]">Crie fila.</span>
+              </h2>
+
+              <motion.div
+                key={reel.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-9 max-w-2xl border-l-4 border-leaf pl-6"
+              >
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-leaf/60">{reel.kicker}</p>
+                <div className="mt-1 flex items-end gap-3">
+                  <span className="font-display text-5xl font-extrabold tracking-tight xl:text-6xl">{reel.views}</span>
+                  <span className="pb-2 text-xs font-bold uppercase tracking-wider text-leaf/60">views no TikTok</span>
+                </div>
+                <h3 className="mt-4 max-w-xl font-display text-2xl font-extrabold leading-tight">{reel.title}</h3>
+                <p className="mt-3 max-w-xl leading-relaxed text-leaf/75">{reel.text}</p>
+              </motion.div>
+
+              <div className="mt-9 flex items-center gap-3" aria-label={`Cena ${active + 1} de ${VIRAL_REELS.length}`}>
+                {VIRAL_REELS.map((item, index) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => setActive(index)}
+                    aria-label={`Exibir Reel ${index + 1}`}
+                    className={`h-3 rounded-full border-2 border-leaf transition-all duration-300 ${index === active ? "w-16 bg-chili" : "w-8 bg-cream hover:bg-cream/70"}`}
+                  />
+                ))}
+              </div>
+              <Button asChild size="lg" className="mt-8 h-14 rounded-full border-[3px] border-leaf bg-chili px-7 font-extrabold text-cream shadow-[6px_7px_0_hsl(var(--leaf))]">
+                <a href="#quero-ser-franqueado">Quero ser franqueado 🥭</a>
+              </Button>
+            </div>
+
+          <motion.div
+            key={reel.id}
+            initial={{ opacity: 0, scale: 0.94, rotate: active === 1 ? 1.5 : -1.5 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="relative mx-auto w-full max-w-[315px] rounded-[2.4rem] border-[5px] border-leaf bg-cream p-3 shadow-[16px_18px_0_hsl(var(--leaf))] xl:max-w-[360px]"
+          >
+            <div className="flex items-center justify-between px-2 pb-3 pt-1">
+              <span className="text-[0.65rem] font-extrabold uppercase tracking-[0.2em]">TikTok · Mango Mix original</span>
+              <span className="rounded-full bg-leaf px-3 py-1 text-[0.65rem] font-extrabold uppercase tracking-wider text-mango">TikTok 0{active + 1}</span>
+            </div>
+            <div className="relative aspect-[9/16] overflow-hidden rounded-[1.65rem] border-[3px] border-leaf bg-leaf">
+              <AutoplayVideo
+                src={reel.video}
+                poster={reel.poster}
+                soundEnabled={soundFor === active}
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-leaf/85 to-transparent px-5 pb-5 pt-24 text-cream">
+                <button
+                  type="button"
+                  onClick={() => setSoundFor((current) => current === active ? null : active)}
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-cream bg-leaf/90 px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-transform hover:-translate-y-0.5"
+                  aria-label={soundFor === active ? "Desativar som deste vídeo" : "Ativar som deste vídeo"}
+                >
+                  {soundFor === active ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                  {soundFor === active ? "Som ligado" : "Ativar som"}
+                </button>
+                <Eye className="h-5 w-5" />
+              </div>
+            </div>
+            <a
+              href={`https://www.tiktok.com/@mangomixoficial/video/${reel.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 flex items-center justify-between rounded-full bg-chili px-5 py-3 text-sm font-extrabold text-cream transition-transform hover:-translate-y-0.5"
+            >
+              Ver no TikTok <ArrowRight className="h-4 w-4" />
+            </a>
+          </motion.div>
+        </div>
+        </div>
+      </section>
+    </>
+  );
+}
 
 function LeadForm({ compact = false }: { compact?: boolean }) {
   const [loading, setLoading] = useState(false);
@@ -228,7 +541,7 @@ function LeadForm({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-leaf/15 bg-card p-6 shadow-xl md:p-8">
+    <form onSubmit={handleSubmit} className="rounded-[2rem] border-[3px] border-leaf bg-cream p-6 shadow-[10px_12px_0_hsl(var(--leaf))] md:p-8">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
           <Label htmlFor="full_name">Nome completo *</Label>
@@ -342,50 +655,80 @@ function LeadForm({ compact = false }: { compact?: boolean }) {
 }
 
 export default function MangoMixFranquia() {
+  const [atTop, setAtTop] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => setAtTop(window.scrollY <= 8);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-cream text-foreground">
+    <div className="mango-landing min-h-screen bg-cream text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-leaf/10 bg-cream/90 backdrop-blur-md">
+      <header className={`sticky top-0 z-50 border-b-[3px] border-leaf bg-cream/95 backdrop-blur-md transition-transform duration-300 ${atTop ? "translate-y-0" : "pointer-events-none -translate-y-full"}`}>
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
           <a href="#topo" className="flex items-center gap-2.5">
             <img src={logo} alt="Mango Mix" width={40} height={40} className="h-10 w-10 object-contain" />
-            <span className="font-display text-lg font-extrabold tracking-tight text-leaf">
-              MANGO MIX <span className="font-medium text-muted-foreground">| Franquias</span>
+            <span className="font-display text-base font-extrabold tracking-tight text-leaf sm:text-lg">
+              MANGO MIX <span className="hidden font-medium text-muted-foreground sm:inline">| Franquias</span>
             </span>
           </a>
           <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
             <a href="#fenomeno" className="text-muted-foreground transition-colors hover:text-leaf">O fenômeno</a>
-            <a href="#modelos" className="text-muted-foreground transition-colors hover:text-leaf">Modelos</a>
+            <a href="#modelos" className="text-muted-foreground transition-colors hover:text-leaf">Investimento</a>
             <a href="#como-funciona" className="text-muted-foreground transition-colors hover:text-leaf">Como funciona</a>
             <a href="#duvidas" className="text-muted-foreground transition-colors hover:text-leaf">Dúvidas</a>
           </nav>
-          <Button asChild className="rounded-full bg-leaf font-bold text-mango hover:bg-leaf/90">
-            <a href="#quero-ser-franqueado">Quero ser franqueado</a>
+          <Button asChild className="rounded-full border-2 border-leaf bg-leaf font-extrabold text-mango shadow-[3px_3px_0_hsl(var(--mango-deep))] hover:bg-leaf/90">
+            <a href="#quero-ser-franqueado">Quero ser franqueado 🥭</a>
           </Button>
         </div>
       </header>
 
       {/* Hero */}
-      <section id="topo" className="relative overflow-hidden bg-leaf">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-mango/20 blur-3xl" />
+      <section id="topo" className="relative overflow-hidden border-b-[3px] border-leaf bg-mango text-leaf">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full border-[60px] border-cream/40" />
         <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-16 md:grid-cols-2 md:py-24">
           <motion.div initial="hidden" animate="show" variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full bg-mango/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-mango">
+            <span className="inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-leaf bg-cream px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-leaf shadow-[4px_4px_0_hsl(var(--leaf))]">
               <Sparkles className="h-3.5 w-3.5" /> Expansão nacional 2026
             </span>
-            <h1 className="mt-6 font-display text-4xl font-extrabold leading-[1.05] text-cream md:text-6xl">
-              A manga temperada que virou{" "}
-              <span className="text-mango">febre no Ceará</span> agora é franquia.
+            <h1 className="mt-7 font-sans text-5xl font-black leading-[0.94] tracking-[-0.065em] text-leaf md:text-7xl">
+              Uma marca com milhões de views.{" "}
+              <span className="mt-2 block text-chili">Uma franquia pronta para a sua cidade.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream/80">
-              O Mango Mix nasceu em um quiosque no Eusébio, viralizou nas redes com filas na porta e
-              hoje abre praças em todo o Brasil. Seja o primeiro a levar a marca para a sua cidade.
+            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-leaf/80">
+              Leve o fenômeno da manga temperada para a sua praça com operação compacta, implantação
+              acompanhada e uma marca que já conquistou milhões de visualizações. 🥭🚀
+            </p>
+            <div className="mt-8 grid max-w-xl grid-cols-3 overflow-hidden rounded-2xl border-[3px] border-leaf bg-cream shadow-[5px_6px_0_hsl(var(--leaf))]">
+              {[
+                { icon: Instagram, n: "1,2 mi", l: "no Instagram", primary: true },
+                { icon: Users, n: "352,9 mil", l: "no TikTok", primary: false },
+                { icon: Eye, n: "12,7 mi", l: "views", primary: false },
+              ].map((s, index) => (
+                <div
+                  key={s.l}
+                  className={`min-w-0 px-3 py-4 text-center sm:px-4 ${index > 0 ? "border-l-2 border-leaf/20" : ""} ${s.primary ? "bg-chili text-cream" : "text-leaf"}`}
+                >
+                  <s.icon aria-hidden="true" className="mx-auto mb-2 h-5 w-5" />
+                  <div className="font-sans text-xl font-black leading-none sm:text-2xl">{s.n}</div>
+                  <div className={`mt-2 text-[0.6rem] font-extrabold uppercase tracking-wider sm:text-[0.65rem] ${s.primary ? "text-cream/80" : "text-leaf/65"}`}>
+                    {s.l}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-leaf/55">
+              Dados públicos dos perfis oficiais · agosto de 2026
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
                 asChild
                 size="lg"
-                className="h-14 rounded-full bg-mango px-8 text-base font-bold text-leaf hover:bg-mango/90"
+                className="h-14 rounded-full border-2 border-leaf bg-chili px-8 text-base font-extrabold text-cream shadow-[5px_5px_0_hsl(var(--leaf))] hover:bg-chili/90"
               >
                 <a href="#quero-ser-franqueado">
                   Quero ser franqueado <ArrowRight className="ml-2 h-5 w-5" />
@@ -395,24 +738,12 @@ export default function MangoMixFranquia() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-14 rounded-full border-cream/30 bg-transparent px-8 text-base font-semibold text-cream hover:bg-cream/10 hover:text-cream"
+                className="h-14 rounded-full border-2 border-leaf bg-cream px-8 text-base font-extrabold text-leaf shadow-[5px_5px_0_hsl(var(--leaf))] hover:bg-cream/80 hover:text-leaf"
               >
                 <a href={IG_PROFILE} target="_blank" rel="noreferrer">
                   <Instagram className="mr-2 h-5 w-5" /> Ver no Instagram
                 </a>
               </Button>
-            </div>
-            <div className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-cream/15 pt-6">
-              {[
-                { n: "1M+", l: "seguidores no Instagram" },
-                { n: "2023", l: "primeiro quiosque, Eusébio/CE" },
-                { n: "600+", l: "vídeos que viraram fila" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <div className="font-display text-2xl font-extrabold text-mango md:text-3xl">{s.n}</div>
-                  <div className="mt-1 text-xs leading-tight text-cream/70">{s.l}</div>
-                </div>
-              ))}
             </div>
           </motion.div>
 
@@ -427,9 +758,9 @@ export default function MangoMixFranquia() {
               alt="Copo de manga temperada com limão e pimenta do Mango Mix"
               width={1600}
               height={1104}
-              className="w-full rounded-[2rem] object-cover shadow-2xl"
+              className="w-full -rotate-1 rounded-[2rem] border-[4px] border-leaf object-cover shadow-[14px_16px_0_hsl(var(--leaf))]"
             />
-            <div className="absolute -bottom-5 -left-5 hidden rounded-2xl bg-cream px-5 py-4 shadow-xl md:block">
+            <div className="absolute -bottom-5 -left-5 hidden rotate-2 rounded-2xl border-[3px] border-leaf bg-cream px-5 py-4 shadow-[6px_7px_0_hsl(var(--leaf))] md:block">
               <div className="font-display text-xl font-extrabold text-leaf">Fila na porta</div>
               <div className="text-xs text-muted-foreground">desde o primeiro vídeo viral</div>
             </div>
@@ -438,13 +769,13 @@ export default function MangoMixFranquia() {
       </section>
 
       {/* Faixa de imprensa */}
-      <div className="border-y border-leaf/10 bg-mango">
+      <div className="border-b-[3px] border-leaf bg-cream">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-5 py-4 text-sm font-bold uppercase tracking-wider text-leaf">
           <span className="opacity-60">Visto em</span>
           <span>Estadão</span>
           <span>PEGN / Globo</span>
           <span>Diário do Nordeste</span>
-          <span>TikTok &amp; Instagram</span>
+          <span>Instagram &amp; TikTok</span>
         </div>
       </div>
 
@@ -475,21 +806,21 @@ export default function MangoMixFranquia() {
                 "Marketing nacional puxado pelas redes",
                 "Público de todas as idades",
               ].map((t) => (
-                <div key={t} className="flex items-start gap-2.5 text-sm font-medium">
+                <div key={t} className="flex items-start gap-2.5 rounded-2xl border-2 border-leaf bg-mango/25 p-3 text-sm font-bold">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-leaf" />
                   <span>{t}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="grid gap-4">
+          <div className="grid gap-7">
             <img
               src={kioskImg}
               alt="Quiosque do Mango Mix com fila de clientes"
               loading="lazy"
               width={1408}
               height={1008}
-              className="w-full rounded-3xl object-cover shadow-lg"
+              className="w-full -rotate-1 rounded-3xl border-[3px] border-leaf object-cover shadow-[9px_10px_0_hsl(var(--leaf))]"
             />
             <img
               src={flatlayImg}
@@ -497,57 +828,14 @@ export default function MangoMixFranquia() {
               loading="lazy"
               width={1408}
               height={912}
-              className="w-full rounded-3xl object-cover shadow-lg"
+              className="w-full rotate-1 rounded-3xl border-[3px] border-leaf object-cover shadow-[9px_10px_0_hsl(var(--leaf))]"
             />
           </div>
         </div>
       </Section>
 
-      {/* Instagram */}
-      <Section className="bg-leaf text-cream">
-        <div className="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-mango/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-mango">
-              <Instagram className="h-3.5 w-3.5" /> @mangomixoficial
-            </span>
-            <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
-              1 milhão de pessoas já assistiram. <span className="text-mango">Elas vão até a loja.</span>
-            </h2>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-cream/80">
-              Cada vídeo do preparo gera desejo — e desejo gera fila. Como franqueado, você opera com o
-              marketing da marca trabalhando por você todos os dias, sem precisar construir audiência do zero.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="h-14 rounded-full bg-mango px-7 font-bold text-leaf hover:bg-mango/90">
-                <a href="#quero-ser-franqueado">
-                  Quero esse fluxo na minha cidade <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-14 rounded-full border-cream/30 bg-transparent px-7 font-semibold text-cream hover:bg-cream/10 hover:text-cream"
-              >
-                <a href={IG_PROFILE} target="_blank" rel="noreferrer">
-                  Abrir o perfil
-                </a>
-              </Button>
-            </div>
-          </div>
-
-          <div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-3xl bg-cream shadow-2xl">
-            <iframe
-              src="https://www.instagram.com/mangomixoficial/embed"
-              title="Vídeos do Instagram do Mango Mix"
-              loading="lazy"
-              scrolling="no"
-              allowTransparency
-              className="h-[560px] w-full border-0"
-            />
-          </div>
-        </div>
-      </Section>
+      {/* TikTok stop-scroll — selected top-performing videos */}
+      <ViralReelsStory />
 
       {/* Por que investir */}
       <Section id="por-que">
@@ -566,7 +854,7 @@ export default function MangoMixFranquia() {
               viewport={{ once: true, amount: 0.3 }}
               variants={fadeUp}
               transition={{ delay: i * 0.05 }}
-              className="rounded-3xl border border-leaf/10 bg-card p-7 shadow-sm transition-shadow hover:shadow-lg"
+              className="rounded-3xl border-[3px] border-leaf bg-cream p-7 shadow-[7px_8px_0_hsl(var(--leaf))] transition-transform hover:-translate-y-1"
             >
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-mango">
                 <w.icon className="h-6 w-6 text-leaf" />
@@ -578,21 +866,21 @@ export default function MangoMixFranquia() {
         </div>
       </Section>
 
-      {/* Modelos */}
-      <Section id="modelos" className="bg-mango/15">
+      {/* Investimento */}
+      <Section id="modelos" className="bg-mango">
         <div className="mx-auto max-w-3xl text-center">
-          <Eyebrow>Modelos de unidade</Eyebrow>
+          <Eyebrow>Investimento transparente</Eyebrow>
           <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
-            Escolha o formato que combina com o seu bolso e a sua cidade
+            Tudo o que seu investimento coloca em movimento. 🥭
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Valores de investimento, taxas e projeções são enviados na apresentação completa, de acordo
-            com o modelo e a praça escolhida.
+            Mais do que abrir uma unidade, você recebe marca, estrutura, equipamentos e acompanhamento
+            para implantar a operação com o padrão Mango Mix.
           </p>
         </div>
         <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {MODELS.map((m) => (
-            <div key={m.name} className="flex flex-col rounded-3xl border border-leaf/10 bg-card p-7 shadow-sm">
+          {INVESTMENT.map((m) => (
+            <div key={m.name} className="flex flex-col rounded-3xl border-[3px] border-leaf bg-cream p-7 shadow-[8px_9px_0_hsl(var(--leaf))]">
               <m.icon className="h-8 w-8 text-leaf" />
               <h3 className="mt-5 font-display text-2xl font-bold">{m.name}</h3>
               <p className="mt-2.5 leading-relaxed text-muted-foreground">{m.desc}</p>
@@ -607,10 +895,52 @@ export default function MangoMixFranquia() {
                 asChild
                 className="mt-6 w-full rounded-full bg-leaf font-bold text-mango hover:bg-leaf/90"
               >
-                <a href="#quero-ser-franqueado">Ver investimento</a>
+                <a href="#quero-ser-franqueado">Receber detalhamento</a>
               </Button>
             </div>
           ))}
+        </div>
+        <div className="mx-auto mt-10 max-w-4xl -rotate-1 rounded-2xl border-[3px] border-leaf bg-cream px-6 py-5 text-center text-sm font-medium leading-relaxed text-leaf shadow-[6px_7px_0_hsl(var(--leaf))]">
+          A composição completa e os valores são apresentados individualmente na conversa com o time de expansão,
+          considerando cidade, ponto, formato e necessidades do projeto. 📋✨
+        </div>
+      </Section>
+
+      {/* Indicadores informados */}
+      <Section>
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <Eyebrow>Referências da operação</Eyebrow>
+            <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
+              Números reais para uma conversa séria sobre expansão.
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              Segundo informações comerciais fornecidas pela franqueadora, as primeiras operações mostraram
+              forte tração no mês de abertura. Os resultados abaixo são históricos ou projeções declaradas e
+              podem não se repetir em outras unidades.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              { value: "R$ 119 mil", label: "São José dos Campos", note: "faturamento informado no 1º mês" },
+              { value: "R$ 115 mil", label: "Belém do Pará", note: "faturamento informado no 1º mês" },
+              { value: "> R$ 200 mil", label: "Vila Velha", note: "projeção informada para o 1º mês" },
+              { value: "4–5 meses", label: "Payback estimado", note: "cenário informado com margem de 30%–35%" },
+            ].map((item, index) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ delay: index * 0.08 }}
+                className="rounded-3xl border-[3px] border-leaf bg-cream p-6 shadow-[7px_8px_0_hsl(var(--leaf))]"
+              >
+                <div className="font-display text-3xl font-extrabold text-leaf">{item.value}</div>
+                <div className="mt-2 font-bold">{item.label}</div>
+                <div className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.note}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </Section>
 
@@ -623,7 +953,7 @@ export default function MangoMixFranquia() {
             loading="lazy"
             width={1200}
             height={1408}
-            className="w-full rounded-3xl object-cover shadow-xl"
+            className="w-full -rotate-2 rounded-3xl border-[4px] border-leaf object-cover shadow-[12px_14px_0_hsl(var(--leaf))]"
           />
           <div>
             <Eyebrow>A história</Eyebrow>
@@ -642,13 +972,13 @@ export default function MangoMixFranquia() {
                   href={p.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group rounded-2xl border border-leaf/10 bg-card p-5 transition-colors hover:border-leaf/30"
+                  className="group rounded-2xl border-2 border-leaf bg-cream p-5 shadow-[4px_5px_0_hsl(var(--leaf))] transition-transform hover:-translate-y-1"
                 >
-                  <Quote className="h-5 w-5 text-mango" />
-                  <p className="mt-3 text-sm leading-snug text-muted-foreground">{p.quote}</p>
-                  <span className="mt-3 block text-xs font-bold uppercase tracking-wider text-leaf">
-                    {p.outlet}
-                  </span>
+                  <div className="flex min-h-10 items-center justify-between gap-3 border-b-2 border-leaf/15 pb-3" aria-label={`Logo ${p.outlet}`}>
+                    <span className={p.logoClass}>{p.logo}</span>
+                    <Quote className="h-5 w-5 shrink-0 text-chili" />
+                  </div>
+                  <p className="mt-4 text-sm leading-snug text-muted-foreground">{p.quote}</p>
                 </a>
               ))}
             </div>
@@ -659,7 +989,7 @@ export default function MangoMixFranquia() {
       {/* Como funciona */}
       <Section id="como-funciona" className="bg-leaf text-cream">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-mango/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-mango">
+          <span className="inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-mango bg-cream px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-leaf shadow-[4px_4px_0_hsl(var(--mango))]">
             Como funciona
           </span>
           <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
@@ -668,17 +998,17 @@ export default function MangoMixFranquia() {
         </div>
         <div className="mt-14 grid gap-5 md:grid-cols-4">
           {STEPS.map((s) => (
-            <div key={s.n} className="rounded-3xl border border-cream/15 bg-cream/5 p-7">
-              <div className="font-display text-4xl font-extrabold text-mango">{s.n}</div>
-              <h3 className="mt-4 font-display text-lg font-bold">{s.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-cream/70">{s.d}</p>
+            <div key={s.n} className="rounded-3xl border-[3px] border-mango bg-cream p-7 text-leaf shadow-[8px_9px_0_hsl(var(--mango))]">
+              <div className="font-sans text-4xl font-black text-chili">{s.n}</div>
+              <h3 className="mt-4 font-display text-lg font-extrabold">{s.t}</h3>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-leaf/70">{s.d}</p>
             </div>
           ))}
         </div>
       </Section>
 
       {/* Formulário */}
-      <Section id="quero-ser-franqueado">
+      <Section id="quero-ser-franqueado" className="bg-mango">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
           <div className="lg:sticky lg:top-24">
             <Eyebrow>Vagas por território</Eyebrow>
@@ -686,8 +1016,8 @@ export default function MangoMixFranquia() {
               Garanta a sua cidade antes que alguém garanta.
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Preencha o formulário e receba a apresentação completa da franquia: modelos de unidade,
-              investimento, suporte, treinamento e projeção de retorno.
+              Preencha o formulário e receba a apresentação completa: composição do investimento,
+              suporte de ponto e arquitetura, treinamento e premissas da projeção de retorno.
             </p>
             <ul className="mt-8 space-y-3">
               {[
@@ -707,7 +1037,7 @@ export default function MangoMixFranquia() {
       </Section>
 
       {/* FAQ */}
-      <Section id="duvidas" className="bg-mango/15">
+      <Section id="duvidas" className="bg-cream">
         <div className="mx-auto max-w-3xl">
           <div className="text-center">
             <Eyebrow>Dúvidas frequentes</Eyebrow>
@@ -715,10 +1045,10 @@ export default function MangoMixFranquia() {
               Tudo o que futuros franqueados perguntam
             </h2>
           </div>
-          <Accordion type="single" collapsible className="mt-10">
+          <Accordion type="single" collapsible className="mt-10 space-y-3">
             {FAQ.map((f) => (
-              <AccordionItem key={f.q} value={f.q} className="border-leaf/15">
-                <AccordionTrigger className="text-left font-display text-lg font-bold hover:no-underline">
+              <AccordionItem key={f.q} value={f.q} className="rounded-2xl border-2 border-leaf bg-mango/20 px-5 data-[state=open]:bg-mango/40">
+                <AccordionTrigger className="text-left font-display text-lg font-extrabold hover:no-underline">
                   {f.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-base leading-relaxed text-muted-foreground">
@@ -731,10 +1061,11 @@ export default function MangoMixFranquia() {
       </Section>
 
       {/* CTA final */}
-      <section className="bg-leaf px-5 py-20 text-center text-cream md:py-28">
-        <div className="mx-auto max-w-3xl">
-          <img src={logo} alt="" loading="lazy" width={96} height={96} className="mx-auto h-24 w-24 object-contain" />
-          <h2 className="mt-8 font-display text-3xl font-extrabold leading-tight md:text-5xl">
+      <section className="relative overflow-hidden border-b-[3px] border-leaf bg-chili px-5 py-20 text-center text-cream md:py-28">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full border-[48px] border-mango/70" />
+        <div className="relative mx-auto max-w-4xl">
+          <img src={logo} alt="" loading="lazy" width={96} height={96} className="mx-auto h-24 w-24 rotate-3 object-contain" />
+          <h2 className="mt-8 font-sans text-4xl font-black leading-[0.95] tracking-[-0.055em] md:text-7xl">
             A manga do Ceará já é nacional. <span className="text-mango">Falta você.</span>
           </h2>
           <p className="mt-5 text-lg text-cream/80">
@@ -743,7 +1074,7 @@ export default function MangoMixFranquia() {
           <Button
             asChild
             size="lg"
-            className="mt-8 h-14 rounded-full bg-mango px-10 text-base font-bold text-leaf hover:bg-mango/90"
+            className="mt-8 h-14 rounded-full border-[3px] border-leaf bg-mango px-10 text-base font-extrabold text-leaf shadow-[6px_7px_0_hsl(var(--leaf))] hover:bg-mango/90"
           >
             <a href="#quero-ser-franqueado">
               Quero ser franqueado <ArrowRight className="ml-2 h-5 w-5" />
@@ -753,7 +1084,7 @@ export default function MangoMixFranquia() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-leaf/10 bg-cream px-5 py-10">
+      <footer className="border-t-[3px] border-leaf bg-mango px-5 py-10">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
           <div className="flex items-center gap-2.5">
             <img src={logo} alt="" loading="lazy" width={32} height={32} className="h-8 w-8 object-contain" />
