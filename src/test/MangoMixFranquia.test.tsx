@@ -24,5 +24,11 @@ describe("MangoMixFranquia", () => {
       "href",
       "https://www.instagram.com/mangomixoficial/",
     );
+
+    const submitButton = screen.getByRole("button", {
+      name: /quero receber a apresentação da franquia/i,
+    });
+    expect(submitButton).toHaveClass("whitespace-normal");
+    expect(submitButton.closest("form")).toHaveClass("min-w-0", "max-w-full");
   });
 });

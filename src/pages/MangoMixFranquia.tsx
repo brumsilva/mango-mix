@@ -104,7 +104,7 @@ function Section({
 }) {
   return (
     <section id={id} className={`relative overflow-hidden border-b-[3px] border-leaf px-5 py-20 md:py-28 ${className}`}>
-      <div className="relative z-10 mx-auto w-full max-w-6xl">
+      <div className="relative z-10 mx-auto min-w-0 w-full max-w-6xl">
         {children}
         {id !== "quero-ser-franqueado" && (
           <div className="mt-14 flex justify-center">
@@ -540,9 +540,12 @@ function LeadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[2rem] border-[3px] border-leaf bg-cream p-6 shadow-[10px_12px_0_hsl(var(--leaf))] md:p-8">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="md:col-span-2">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full min-w-0 max-w-full rounded-[2rem] border-[3px] border-leaf bg-cream p-4 shadow-[7px_8px_0_hsl(var(--leaf))] sm:p-6 sm:shadow-[10px_12px_0_hsl(var(--leaf))] md:p-8"
+    >
+      <div className="grid min-w-0 gap-4 md:grid-cols-2">
+        <div className="min-w-0 md:col-span-2">
           <Label htmlFor="full_name">Nome completo *</Label>
           <Input
             id="full_name"
@@ -553,7 +556,7 @@ function LeadForm() {
             className="mt-1.5"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label htmlFor="email">E-mail *</Label>
           <Input
             id="email"
@@ -565,7 +568,7 @@ function LeadForm() {
             className="mt-1.5"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label htmlFor="phone">WhatsApp *</Label>
           <Input
             id="phone"
@@ -576,7 +579,7 @@ function LeadForm() {
             className="mt-1.5"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label htmlFor="city">Cidade de interesse</Label>
           <Input
             id="city"
@@ -586,7 +589,7 @@ function LeadForm() {
             className="mt-1.5"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label htmlFor="state">Estado</Label>
           <Input
             id="state"
@@ -596,7 +599,7 @@ function LeadForm() {
             className="mt-1.5"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label>Capital disponível</Label>
           <Select value={form.capital_range} onValueChange={set("capital_range")}>
             <SelectTrigger className="mt-1.5">
@@ -610,7 +613,7 @@ function LeadForm() {
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className="min-w-0">
           <Label>Quando pretende abrir</Label>
           <Select value={form.timeline} onValueChange={set("timeline")}>
             <SelectTrigger className="mt-1.5">
@@ -624,7 +627,7 @@ function LeadForm() {
             </SelectContent>
           </Select>
         </div>
-        <div className="md:col-span-2">
+        <div className="min-w-0 md:col-span-2">
           <Label htmlFor="message">Conte um pouco sobre você</Label>
           <Textarea
             id="message"
@@ -641,7 +644,7 @@ function LeadForm() {
         type="submit"
         size="lg"
         disabled={loading}
-        className="mt-6 h-14 w-full rounded-full bg-leaf text-base font-bold text-mango hover:bg-leaf/90"
+        className="mt-6 min-h-14 h-auto w-full min-w-0 whitespace-normal rounded-full bg-leaf px-4 py-3 text-center text-sm font-bold leading-tight text-mango hover:bg-leaf/90 sm:h-14 sm:whitespace-nowrap sm:px-8 sm:text-base"
       >
         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Quero receber a apresentação da franquia"}
         {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
@@ -1008,8 +1011,8 @@ export default function MangoMixFranquia() {
 
       {/* Formulário */}
       <Section id="quero-ser-franqueado" className="bg-mango">
-        <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-          <div className="lg:sticky lg:top-24">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+          <div className="min-w-0 lg:sticky lg:top-24">
             <Eyebrow>Vagas por território</Eyebrow>
             <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
               Garanta a sua cidade antes que alguém garanta.
